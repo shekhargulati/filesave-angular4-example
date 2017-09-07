@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Http, Headers } from '@angular/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import 'rxjs/add/operator/toPromise';
 import { saveAs } from 'file-saver/FileSaver';
 
@@ -10,12 +10,15 @@ import { saveAs } from 'file-saver/FileSaver';
 })
 export class AppComponent {
 
-  constructor(private http: Http) { }
+  constructor(private http: HttpClient) { }
 
   saveFile() {
-    const headers = new Headers();
-    headers.append('Accept', 'text/plain');
-    this.http.get('http://localhost:8080/api/files', { headers: headers })
+    const headers = new HttpHeaders()
+    set('Accept', 'text/plain');
+    this.http.get(
+      'http://localhost:8080/api/files',
+      { headers, observe:'response', responseType: 'blob' }
+    )
       .toPromise()
       .then(response => this.saveToFileSystem(response));
   }
@@ -23,8 +26,8 @@ export class AppComponent {
   private saveToFileSystem(response) {
     const contentDispositionHeader: string = response.headers.get('Content-Disposition');
     const parts: string[] = contentDispositionHeader.split(';');
-    const filename = parts[1].split('=')[1];
-    const blob = new Blob([response._body], { type: 'text/plain' });
+    const filename = parts[1].split('=')[1].replace(/^"+|"+$/gm,'');
+    const blob = response.body;
     saveAs(blob, filename);
   }
 }
