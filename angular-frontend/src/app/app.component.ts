@@ -14,7 +14,7 @@ export class AppComponent {
 
   saveFile() {
     const headers = new HttpHeaders()
-    set('Accept', 'text/plain');
+    .set('Accept', 'text/plain');
     this.http.get(
       'http://localhost:8080/api/files',
       { headers, observe:'response', responseType: 'blob' }
